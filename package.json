@@ -1,0 +1,66 @@
+{
+  "name": "hcent",
+  "version": "0.1.0",
+  "description": "hcent — 终端编码助手，自然语言驱动的终端编程工具",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "bin": {
+    "hcent": "./dist/bin.js"
+  },
+  "scripts": {
+    "dev": "node --env-file=.env --import tsx src/bin.ts",
+    "prepare": "npm run build && simple-git-hooks",
+    "build": "tsc",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged"
+  },
+  "lint-staged": {
+    "*.{ts,mts,cts}": "eslint --fix --max-warnings=0"
+  },
+  "keywords": [
+    "tui",
+    "agent",
+    "llm",
+    "cli",
+    "hcent"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@10.27.0",
+  "dependencies": {
+    "@earendil-works/pi-tui": "^0.79.3",
+    "chalk": "^5.6.2",
+    "openai": "^6.43.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "overrides": {
+      "esbuild": "0.28.1"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@rollup/rollup-win32-x64-msvc": "^4.61.1",
+    "@types/node": "^26.0.1",
+    "eslint": "^10.6.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import-x": "^4.17.1",
+    "lint-staged": "^17.0.8",
+    "simple-git-hooks": "^2.13.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.63.0",
+    "vitest": "^3.2.6"
+  }
+}

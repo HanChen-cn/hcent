@@ -1,0 +1,34 @@
+// hcent 用户全局配置示例
+// 将此文件保存到 ~/.hcent/config.json 即可全局生效
+// 或在项目根目录创建 .hcent/config.json 覆盖全局配置（仅当前项目）
+
+{
+  // === 必填：API Key ===
+  // 优先读取环境变量 HCENT_API_KEY，未设时使用此值
+  "apiKey": "your-api-key-here",
+
+  // === 模型列表 ===
+  "models": [
+    {
+      "name": "deepseek-pro",
+      "model": "deepseek-v4-pro",
+      "baseUrl": "https://api.deepseek.com",
+      "apiKey": "your-api-key-here",
+      "maxContextTokens": 65536
+    },
+    {
+      "name": "deepseek-flash",
+      "model": "deepseek-v4-flash",
+      "baseUrl": "https://api.deepseek.com",
+      "apiKey": "your-api-key-here",
+      "maxContextTokens": 65536
+    }
+  ],
+
+  // === 可选字段 ===
+  // "activeModel": "deepseek-pro",   // 默认激活的模型名（不设则用 models[0]）
+  // "maxLoops": 68,                     // Agent 最大循环轮次
+  // "timeoutMs": 60000,                 // 请求超时（毫秒）
+  // "maxRetries": 2,                    // 失败重试次数
+  // "searchApiKey": "",                 // 网络搜索 API Key（可选，用于 websearch 工具）
+}
