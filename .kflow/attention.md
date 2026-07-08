@@ -27,7 +27,8 @@
 ### 命令与脚本陷阱
 
 - Git commit：Conventional Commits（`feat:`/`fix:`/`refactor:`/`chore:`/`docs:`/`test:`），描述中文、术语保留英文。
-- `pnpm prepare` 会执行 `build` 并注册 `simple-git-hooks`；pre-commit 跑 `lint-staged`。
+- `pnpm prepare` 在本地 clone 时注册 git hooks；从 npm 全局安装不会注册。
+- 发布：`npm publish` 前 `prepack` 编译 `dist/`；用户 `npm install -g hcent` 拿到预编译包。Git 直装由 `scripts/prepare.mjs` 现场 `npx tsc`。
 - **Lint 不通过不允许 commit**（见下方 ESLint 规则）。
 
 ### 路径与目录约定

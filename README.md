@@ -2,42 +2,50 @@
 
 终端编码助手 —— 在终端里用自然语言驱动 AI 完成编程任务。
 
+基于 [pi-tui](https://www.npmjs.com/package/@earendil-works/pi-tui) 的交互界面，内置 Agent 循环、10 个文件/Shell 工具、权限确认与 Skill（`/k-xxx`）引用。默认接入 [DeepSeek 官方 API](https://platform.deepseek.com)。
+
 ## 环境要求
 
 - **Node.js** >= 20
-- 终端需支持 TTY（在真正的终端窗口中运行，不要在非交互管道里用）
+- **pnpm**（推荐，见 `packageManager` 字段）
+- 在真实 TTY 终端中运行（不要在非交互管道里用）
 
 ## 安装
 
 ### 全局安装（推荐）
 
-安装后在**任意目录**均可运行 `hcent`：
+发布到 npm 后：
 
 ```bash
-# 从 npm Registry 安装（发布后可用）
 npm install -g hcent
-
-# 或从 Git 仓库安装
-npm install -g git+<仓库 URL>
 ```
 
-验证命令是否在 PATH 中：
+在发布前，也可从 GitHub 安装（会触发编译，需 Node.js >= 20）：
+
+```bash
+npm install -g git+https://github.com/HanChen-cn/hcent.git
+```
+
+安装后在**任意目录**执行 `hcent` 即可（工作目录决定 Agent 操作的项目路径）。
+
+验证：
 
 ```bash
 where hcent       # Windows
 which hcent       # macOS / Linux
+hcent --setup     # 首次配置 API Key（可选）
 ```
 
 ### 本地开发
 
 ```bash
-git clone <仓库 URL>
+git clone https://github.com/HanChen-cn/hcent.git
 cd hcent
 pnpm install
-pnpm dev          # 开发模式，直接跑 TypeScript 源码
+pnpm dev          # 开发模式，tsx 直跑 src/
 ```
 
-全局调试（改代码后需 `pnpm build`）：
+全局调试（改代码后需重新编译）：
 
 ```bash
 pnpm build
@@ -46,62 +54,26 @@ pnpm link --global
 
 ## 首次配置
 
-首次运行需要配置 **DeepSeek 官方 API Key**。任选一种方式即可。
+需要 [DeepSeek API Key](https://platform.deepseek.com/api_keys)。任选一种方式：
 
-### 方式一：交互向导（推荐）
+| 方式 | 说明 |
+|------|------|
+| `hcent --setup` | 交互向导，写入 `~/.hcent/config.json` |
+| 直接 `hcent` | 无 Key 时 TUI 引导填写 |
+| 环境变量 | `HCENT_API_KEY=...` |
+| 项目 `.env` | 复制 `.env.example`，放在**当前工作目录**根下 |
+| 配置文件 | `~/.hcent/config.json` 或 `<cwd>/.hcent/config.json` |
 
-```bash
-hcent --setup
-```
+`hcent` 启动时会读取当前目录下的 `.env`（不覆盖已在 shell 中设置的变量）。
 
-配置写入 `~/.hcent/config.json`，所有项目共享。
+完整配置示例见仓库根目录 [`config.example.json`](config.example.json)。
 
-### 方式二：直接启动 TUI
-
-```bash
-cd your-project
-hcent
-```
-
-未配置 API Key 时，TUI 会引导你在输入框中填写，同样保存到 `~/.hcent/config.json`。
-
-### 方式三：环境变量
-
-```bash
-# Windows PowerShell
-$env:HCENT_API_KEY = "your-api-key"
-
-# macOS / Linux
-export HCENT_API_KEY=your-api-key
-```
-
-### 方式四：项目级 `.env`
-
-在项目根目录创建 `.env`（参考 `.env.example`）：
-
-```env
-HCENT_API_KEY=your-api-key
-HCENT_MODEL=deepseek-v4-pro
-HCENT_BASE_URL=https://api.deepseek.com
-```
-
-`hcent` 启动时会自动读取**当前工作目录**下的 `.env`。
-
-### 方式五：配置文件
-
-| 作用域 | 路径 | 说明 |
-|--------|------|------|
-| 用户全局 | `~/.hcent/config.json` | 所有项目默认使用 |
-| 项目级 | `<cwd>/.hcent/config.json` | 仅在该目录及子目录运行时生效 |
-
-项目级配置会覆盖用户全局配置中的同名字段。
-
-## 配置优先级
+### 配置优先级
 
 从高到低：
 
-1. 环境变量 `HCENT_*`（含已在 shell 中 export 的变量）
-2. 项目根目录 `.env`（仅填充尚未设置的环境变量）
+1. 已在 shell 中 `export` 的 `HCENT_*`
+2. 项目根目录 `.env`（填充尚未设置的环境变量）
 3. 项目 `.hcent/config.json`
 4. 用户 `~/.hcent/config.json`
 5. 内置默认值
@@ -113,42 +85,11 @@ HCENT_BASE_URL=https://api.deepseek.com
 | `HCENT_API_KEY` | API Key | （必填） |
 | `HCENT_MODEL` | 模型标识 | `deepseek-v4-pro` |
 | `HCENT_BASE_URL` | API Base URL | `https://api.deepseek.com` |
-| `HCENT_SEARCH_API_KEY` | 搜索工具 API Key | 空（未配置时搜索工具不可用） |
+| `HCENT_SEARCH_API_KEY` | 网络搜索（`websearch` 工具） | 空 |
 
-### 配置文件示例
+`provider` 支持 `deepseek`（默认）与 `openai-compatible`。多模型通过 `models[]` 配置，TUI 内 `/model` 热切换。
 
-`~/.hcent/config.json`：
-
-```json
-{
-  "apiKey": "your-api-key",
-  "model": "deepseek-v4-pro",
-  "baseUrl": "https://api.deepseek.com",
-  "provider": "deepseek",
-  "maxLoops": 68,
-  "timeoutMs": 60000,
-  "maxRetries": 2,
-  "activeModel": "deepseek-pro",
-  "models": [
-    {
-      "name": "deepseek-pro",
-      "model": "deepseek-v4-pro",
-      "baseUrl": "https://api.deepseek.com",
-      "apiKey": "your-api-key",
-      "maxContextTokens": 65536
-    },
-    {
-      "name": "deepseek-flash",
-      "model": "deepseek-v4-flash",
-      "baseUrl": "https://api.deepseek.com",
-      "apiKey": "your-api-key",
-      "maxContextTokens": 65536
-    }
-  ]
-}
-```
-
-> API Key 等敏感信息请勿提交到 Git。`.env` 已在 `.gitignore` 中忽略。
+> API Key 勿提交 Git。`.env` 已在 `.gitignore` 中。
 
 ## 使用
 
@@ -157,7 +98,7 @@ cd your-project    # 进入要操作的项目目录
 hcent              # 启动 TUI
 ```
 
-在 TUI 中用自然语言描述任务即可。常用斜杠命令：
+用自然语言描述任务即可。常用斜杠命令：
 
 | 命令 | 说明 |
 |------|------|
@@ -165,20 +106,55 @@ hcent              # 启动 TUI
 | `/clear` | 清空当前会话 |
 | `/model [name]` | 列出或切换模型 |
 | `/status` | 查看当前状态 |
-| `/save [title]` | 保存会话 |
-| `/load [id]` | 加载已保存会话 |
-| `/k-xxx` | 引用 skill（如 `/k-flow`） |
+| `/save` | 保存会话 |
+| `/load [id]` | 加载会话（无 id 时列出） |
+| `/sessions` | 列出已保存会话 |
+| `/k-xxx` | 引用 skill（如 `/k-flow`），支持一行多个 |
 | `/exit` | 退出 |
+
+### 内置工具
+
+| 工具 | 权限 | 说明 |
+|------|------|------|
+| `ls` `read` `glob` `grep` `tree` `fetch` | 自动 | 浏览、搜索、读取 |
+| `write` `edit` `bash` `websearch` | 需确认 | 写入、编辑、Shell、搜索 |
+
+写操作与 Shell 执行前 TUI 会弹出确认；拒绝结果会写入会话上下文。
+
+### Skill 加载目录
+
+后者同名覆盖前者：
+
+`~/.claude/skills` → `~/.cursor/skills` → `~/.agents/skills` → `~/.hcent/skills` → 项目 `.agents` / `.hcent` / `.cursor/skills`
 
 ## 开发
 
 ```bash
 pnpm install
-pnpm dev           # 开发运行
+pnpm dev           # 开发运行（--env-file=.env）
 pnpm build         # 编译到 dist/
-pnpm test          # 运行测试
+pnpm test          # vitest
+pnpm test:watch    # 监听模式
+pnpm lint          # ESLint 检查
+pnpm lint:fix      # 自动修复（含 import 合并）
 ```
+
+代码在 `src/`（按模块分子目录），测试在 `test/`（镜像结构，别名 `@` → `src`）。
+
+提交前会经 `lint-staged` 跑 ESLint；规则包括：同文件 import 合并、圈复杂度 ≤ 10、单文件 ≤ 999 行。
+
+架构与模块说明见 [`.kflow/architecture/ARCHITECTURE.md`](.kflow/architecture/ARCHITECTURE.md)。
+
+### 发布到 npm（维护者）
+
+```bash
+pnpm build
+npm pack          # 检查 tarball 是否含 dist/
+npm publish       # 需 npm 登录且有包名权限
+```
+
+发布前 `prepack` 会自动编译；用户 `npm install -g hcent` 时拿到的是预编译 `dist/`，无需本机 TypeScript。
 
 ## License
 
-MIT
+MIT — 见 [LICENSE](LICENSE)。

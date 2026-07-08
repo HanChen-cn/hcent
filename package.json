@@ -14,7 +14,8 @@
   },
   "scripts": {
     "dev": "node --env-file=.env --import tsx src/bin.ts",
-    "prepare": "npm run build && simple-git-hooks",
+    "prepare": "node scripts/prepare.mjs",
+    "prepack": "npm run build",
     "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -35,6 +36,14 @@
     "hcent"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HanChen-cn/hcent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/HanChen-cn/hcent/issues"
+  },
+  "homepage": "https://github.com/HanChen-cn/hcent#readme",
   "packageManager": "pnpm@10.27.0",
   "dependencies": {
     "@earendil-works/pi-tui": "^0.79.3",
