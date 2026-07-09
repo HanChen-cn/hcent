@@ -1,0 +1,7 @@
+# pnpm / npm 项目配置（可提交）
+shamefully-hoist=true
+auto-install-peers=true
+registry=https://registry.npmjs.org/
+
+# 发布用 token 写在用户级 ~/.npmrc，勿提交到仓库：
+# //registry.npmjs.org/:_authToken=npm_xxxxxxxx
